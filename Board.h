@@ -22,6 +22,8 @@ private:
 	int state;
 	int rank;
 
+	void updateRank();
+
 public:
 	Board() { makeBoard(); };
 	Board(const Board & b);  //Create board from another board
@@ -42,7 +44,6 @@ public:
 	int getState();
 	int getRank() { return rank; };
 
-	void updateRank();
 	void changeState(int new_state);
 };
 #endif
