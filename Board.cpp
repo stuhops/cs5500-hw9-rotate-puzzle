@@ -123,6 +123,3 @@ void Board::addHistory(std::string new_history) {
 void Board::changeState(int new_state) {
 	state = new_state;
 }
-
-
-
