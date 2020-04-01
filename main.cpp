@@ -87,16 +87,22 @@ int main() {
 				state1++;
 				temp1 = the_queue.getHeadBoardInfo();
 				temp1.move(4 * i + 0);	//Rotate North.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl << temp1.toString() << endl;
+				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
+								  << temp1.getRank() << endl
+									<< temp1.toString() << endl;
 				the_queue.addBoard(temp1, state1);
 				if (temp1.operator==(perfect_board))
 					goto ident;
+				
+				return 0;
 
 				//Create a copy of the head board, move South, and check if the user wins.
 				state1++;
 				temp2 = the_queue.getHeadBoardInfo();
 				temp2.move(4 * i + 1);  //Rotate South.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp2.history() << endl << temp2.toString() << endl;
+				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp2.history() << endl 
+								  << temp2.getRank() << endl 
+									<< temp2.toString() << endl;
 				the_queue.addBoard(temp2, state1);
 				if (temp2.operator==(perfect_board))
 					goto ident;
@@ -105,7 +111,9 @@ int main() {
 				state1++;
 				temp3 = the_queue.getHeadBoardInfo();
 				temp3.move(4 * i + 2);  //Rotate East.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp3.history() << endl << temp3.toString() << endl;
+				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp3.history() << endl 
+									<< temp3.getRank() << endl
+									<< temp3.toString() << endl;
 				the_queue.addBoard(temp3, state1);
 				if (temp3.operator==(perfect_board))
 					goto ident;
@@ -114,7 +122,9 @@ int main() {
 				state1++;
 				temp4 = the_queue.getHeadBoardInfo();
 				temp4.move(4 * i + 3);  //Rotate West
-					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp4.history() << endl << temp4.toString() << endl;
+					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp4.history() << endl 
+										<< temp4.getRank() << endl
+										<< temp4.toString() << endl;
 					the_queue.addBoard(temp4, state1);
 					if (temp4.operator==(perfect_board))
 						goto ident;

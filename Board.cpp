@@ -29,6 +29,7 @@ std::string Board::move(int m) {
 	case 3:  rotateWest(sub); ss << "<" << sub; break;
 	}
 	addHistory(ss.str());
+	updateRank();
 	return ss.str();
 }
 
@@ -122,4 +123,30 @@ void Board::addHistory(std::string new_history) {
 
 void Board::changeState(int new_state) {
 	state = new_state;
+}
+
+// Low score is better
+void Board::updateRank() {
+	int score = 0;
+
+	cout << endl;
+	for(int i = 0; i < SIZE; i++) {
+		for(int j = 0; j < SIZE; j++) {
+			int curr = board[i][j];
+			int perfJ = (curr - 1) % SIZE;
+			int perfI = (curr - perfJ - 1) / SIZE;
+
+			int scoreI = abs(i - perfI);
+			int scoreJ = abs(j - perfJ);
+
+			// Item can rotate either way so the score should be adjusted accordingly
+			scoreI = scoreI <= SIZE / 2 ? scoreI : SIZE - scoreI;  
+			scoreJ = scoreJ <= SIZE / 2 ? scoreJ : SIZE - scoreJ;  
+
+			score += scoreI + scoreJ;
+		}
+		cout << endl;
+	}
+
+	rank = score;
 }
