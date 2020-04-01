@@ -94,8 +94,6 @@ int main() {
 				if (temp1.operator==(perfect_board))
 					goto ident;
 				
-				return 0;
-
 				//Create a copy of the head board, move South, and check if the user wins.
 				state1++;
 				temp2 = the_queue.getHeadBoardInfo();

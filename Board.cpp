@@ -129,7 +129,6 @@ void Board::changeState(int new_state) {
 void Board::updateRank() {
 	int score = 0;
 
-	cout << endl;
 	for(int i = 0; i < SIZE; i++) {
 		for(int j = 0; j < SIZE; j++) {
 			int curr = board[i][j];
@@ -145,7 +144,6 @@ void Board::updateRank() {
 
 			score += scoreI + scoreJ;
 		}
-		cout << endl;
 	}
 
 	rank = score;
