@@ -25,6 +25,8 @@ Board::Board(int arr[], string history) {
 			board[i][j] = arr[j + i*SIZE];
 		}
 	}
+
+	updateRank();
 }
 
 // Make one move.  m indicates which move is wanted. Return string describing the move
