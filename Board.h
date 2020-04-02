@@ -20,6 +20,9 @@ private:
 	int board[SIZE][SIZE];  // Values of board
 	std::string move_history;
 	int state;
+	int rank;
+
+	void updateRank();
 
 public:
 	Board() { makeBoard(); };
@@ -27,16 +30,20 @@ public:
 	std::string move(int m);  //m is which move.  Returns string describing move
 	std::string history(); //Returns the history of the board
 	std::string toString() const;  //return a string which represents the contents of the board
-	int getState();
 	bool operator==(Board &b);   //Return true if two boards are equal
 	void makeBoard(int jumbleCt = 0);  //Starting from a perfect board, do jumbleCt moves to alter it
 	void jumble(int ct);  //Do jumble moves to alter board
+
 	void rotateEast(int row);
 	void rotateWest(int row);
 	void rotateNorth(int col);
 	void rotateSouth(int col);
+
 	void addHistory(std::string new_history); //Adds to the history string.
+
+	int getState();
+	int getRank() { return rank; };
+
 	void changeState(int new_state);
-	
 };
 #endif
