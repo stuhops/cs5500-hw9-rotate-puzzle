@@ -12,6 +12,7 @@
 #include <fstream>
 #include <cassert>
 #include <sstream>
+#include <vector>
 
 
 class Board {
@@ -28,6 +29,8 @@ public:
 	Board() { makeBoard(); };
 	Board(int arr[], std::string history);
 	Board(const Board & b);  //Create board from another board
+	std::vector<int> toArray(Board b); //Takes Board and returns contents into array of integers
+										//in order to send contents through MPI
 	std::string move(int m);  //m is which move.  Returns string describing move
 	std::string history(); //Returns the history of the board
 	std::string toString() const;  //return a string which represents the contents of the board

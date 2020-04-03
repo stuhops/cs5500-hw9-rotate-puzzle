@@ -5,6 +5,9 @@
 */
 
 #include "Board.h"
+#include <vector>
+
+using namespace std;
 
 //Copy constructor
 Board::Board(const Board & b) {
@@ -14,6 +17,19 @@ Board::Board(const Board & b) {
 		for (int j = 0; j < SIZE; j++)
 			board[i][j] = b.board[i][j];
 	move_history = b.move_history;
+}
+
+Board::vector<int> toArray(const Board b){
+	// assert(SIZE > 0);
+	// std::cout << b << std::endl;
+
+	vector<int> temp;
+	for(int i = 0; i < 3; i++){
+		for(int j = 0; j < 3; j++){
+			temp.push_back(b.board[i][j]);
+		}
+	}
+	return temp;
 }
 
 // Does not verify the incoming array is the correct size

@@ -10,6 +10,10 @@
 #include "Queue.cpp"
 #include <iostream>
 #include <string>
+#include <mpi.h>
+#include <vector>
+
+#define MCW MPI_COMM_WORLD
 
 using namespace std;
 
@@ -50,7 +54,8 @@ int main() {
 
 	//start 4 set up
 	start4.makeBoard(4);
-	while (true) {
+
+	
 		//Print out the to the terminal to give the user options of boards to start from.
 		std::cout << endl << "Option 1: " << endl << start1.toString() << endl;
 		std::cout << endl << "Option 2: " << endl << start2.toString() << endl;
@@ -72,62 +77,108 @@ int main() {
 		case 3:  primary_board = start3; break;
 		case 4:  primary_board = start4; break;
 		}
+
+		int rank, size;
+    	int data;
+
+		MPI_Init(&argc, &argv);
+		MPI_Comm_rank(MCW, &rank); 
+		MPI_Comm_size(MCW, &size); 
+
+		vector<Board> processQueue;
 		the_queue.addBoard(primary_board, state1);
 
-		//Check to see if they started with a perfect board.
-		if (perfect_board.operator==(primary_board))
-			std::cout << "You started with a perfect board." << endl;
-		//If not then solve for the starting puzzle.
-		else {
-			while (true) {
+
+		if(rank == 0){
+			//Check to see if they started with a perfect board.
+			if (perfect_board.operator==(primary_board))
+				std::cout << "You started with a perfect board." << endl;
+			//If not then solve for the starting puzzle.
+			else {
+				
+				Board tempBoard1 = new Board();
+				Board tempBoard2 = new Board();
+				Board tempBoard3 = new Board();
+				Board tempBoard4 = new Board();
+
 				num_of_levels++;
 				for (int i = 0; i < 3; i++) {
 						
-				//Create a copy of the head board, move North, and check if the user wins.
-				state1++;
-				temp1 = the_queue.getHeadBoardInfo();
-				temp1.move(4 * i + 0);	//Rotate North.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
-								  << temp1.getRank() << endl
-									<< temp1.toString() << endl;
-				the_queue.addBoard(temp1, state1);
-				if (temp1.operator==(perfect_board))
-					goto ident;
-				
-				//Create a copy of the head board, move South, and check if the user wins.
-				state1++;
-				temp2 = the_queue.getHeadBoardInfo();
-				temp2.move(4 * i + 1);  //Rotate South.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp2.history() << endl 
-								  << temp2.getRank() << endl 
-									<< temp2.toString() << endl;
-				the_queue.addBoard(temp2, state1);
-				if (temp2.operator==(perfect_board))
-					goto ident;
-
-				//Create a copy of the head board, move East, and check if the user wins.
-				state1++;
-				temp3 = the_queue.getHeadBoardInfo();
-				temp3.move(4 * i + 2);  //Rotate East.
-				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp3.history() << endl 
-									<< temp3.getRank() << endl
-									<< temp3.toString() << endl;
-				the_queue.addBoard(temp3, state1);
-				if (temp3.operator==(perfect_board))
-					goto ident;
-
-				//Create a copy of the head board, move West, and check if the user wins.
-				state1++;
-				temp4 = the_queue.getHeadBoardInfo();
-				temp4.move(4 * i + 3);  //Rotate West
-					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp4.history() << endl 
-										<< temp4.getRank() << endl
-										<< temp4.toString() << endl;
-					the_queue.addBoard(temp4, state1);
-					if (temp4.operator==(perfect_board))
+					//Create a copy of the head board, move North, and check if the user wins.
+					state1++;
+					temp1 = the_queue.getHeadBoardInfo();
+					temp1.move(4 * i + 0);	//Rotate North.
+					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
+									<< temp1.getRank() << endl
+										<< temp1.toString() << endl;
+					the_queue.addBoard(temp1, state1);
+					if (temp1.operator==(perfect_board))
 						goto ident;
+					
+					//Create a copy of the head board, move South, and check if the user wins.
+					state1++;
+					temp2 = the_queue.getHeadBoardInfo();
+					temp2.move(4 * i + 1);  //Rotate South.
+					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp2.history() << endl 
+									<< temp2.getRank() << endl 
+										<< temp2.toString() << endl;
+					the_queue.addBoard(temp2, state1);
+					if (temp2.operator==(perfect_board))
+						goto ident;
+
+					//Create a copy of the head board, move East, and check if the user wins.
+					state1++;
+					temp3 = the_queue.getHeadBoardInfo();
+					temp3.move(4 * i + 2);  //Rotate East.
+					std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp3.history() << endl 
+										<< temp3.getRank() << endl
+										<< temp3.toString() << endl;
+					the_queue.addBoard(temp3, state1);
+					if (temp3.operator==(perfect_board))
+						goto ident;
+
+					//Create a copy of the head board, move West, and check if the user wins.
+					state1++;
+					temp4 = the_queue.getHeadBoardInfo();
+					temp4.move(4 * i + 3);  //Rotate West
+						std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp4.history() << endl 
+											<< temp4.getRank() << endl
+											<< temp4.toString() << endl;
+						the_queue.addBoard(temp4, state1);
+						if (temp4.operator==(perfect_board))
+							goto ident;
+					
+					if(i == 2){
+						tempBoard1 = temp1;
+						tempBoard2 = temp2;
+						tempBoard3 = temp3;
+						tempBoard4 = temp4;
+					}
 	
 				}
+
+				int arr1[9];
+				int arr2[9];
+				int arr3[9];
+				int arr4[9];
+
+				vector<int> tempVector1 = tempBoard1.toArray(tempBoard1);
+				cout << tempVector1 << endl;
+
+				// arr1 = tempBoard1.toArray(tempBoard1);
+
+
+				// for(int i = 0; i < 9; i++){
+
+				// }
+				// cout << arr1 << endl;
+				// arr2 = tempBoard2.toArray(tempBoard2);
+				// arr3 = tempBoard3.toArray(tempBoard3);
+				// arr4 = tempBoard4.toArray(tempBoard4)
+
+				
+
+				
 				the_queue.deleteFirst();
 	
 				//This program runs using integers. If the state counter is above 32,000 then it might cause overflow in many of the variables.
@@ -136,6 +187,7 @@ int main() {
 					std::cout << "The board entered either impossible to solve, or took to many moves to be solved by this program. Goodbye." << endl;
 					return 0;
 				}
+				
 			}
 		}
 		ident:
@@ -147,7 +199,8 @@ int main() {
 		if (again == 0)
 			break;
 		state1 = 0;
-	}
+	
 	std::cout << "Goodbye" << endl;
+    MPI_Finalize();
 	return 0;
 }
