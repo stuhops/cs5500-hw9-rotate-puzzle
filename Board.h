@@ -12,7 +12,9 @@
 #include <fstream>
 #include <cassert>
 #include <sstream>
+#include <vector>
 
+using namespace std;
 
 class Board {
 private:
@@ -31,6 +33,7 @@ public:
 	std::string move(int m);  //m is which move.  Returns string describing move
 	std::string history(); //Returns the history of the board
 	std::string toString() const;  //return a string which represents the contents of the board
+	std::vector<int> toVect();
 	bool operator==(Board &b);   //Return true if two boards are equal
 	void makeBoard(int jumbleCt = 0);  //Starting from a perfect board, do jumbleCt moves to alter it
 	void jumble(int ct);  //Do jumble moves to alter board
