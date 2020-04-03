@@ -19,7 +19,7 @@ Board::Board(const Board & b) {
 	move_history = b.move_history;
 }
 
-Board::vector<int> toArray(const Board b){
+vector<int> Board::toArray(const Board b){
 	// assert(SIZE > 0);
 	// std::cout << b << std::endl;
 

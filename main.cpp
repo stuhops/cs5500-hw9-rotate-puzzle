@@ -17,7 +17,9 @@
 
 using namespace std;
 
-int main() {
+void print(string msg, vector<int> vect);
+
+int main(int argc, char **argv) {
 	//Variables:
 	int primary_board_sum = 0;
 	int num_of_levels = 0;
@@ -96,10 +98,10 @@ int main() {
 			//If not then solve for the starting puzzle.
 			else {
 				
-				Board tempBoard1 = new Board();
-				Board tempBoard2 = new Board();
-				Board tempBoard3 = new Board();
-				Board tempBoard4 = new Board();
+				Board tempBoard1;
+				Board tempBoard2;
+				Board tempBoard3;
+				Board tempBoard4;
 
 				num_of_levels++;
 				for (int i = 0; i < 3; i++) {
@@ -163,7 +165,7 @@ int main() {
 				int arr4[9];
 
 				vector<int> tempVector1 = tempBoard1.toArray(tempBoard1);
-				cout << tempVector1 << endl;
+				print("tempVect1", tempVector1);
 
 				// arr1 = tempBoard1.toArray(tempBoard1);
 
@@ -196,11 +198,18 @@ int main() {
 
 		std::cout << endl << "Please enter a 0 to quit or a 1 to try another board: ";
 		std::cin >> again;
-		if (again == 0)
-			break;
 		state1 = 0;
 	
 	std::cout << "Goodbye" << endl;
     MPI_Finalize();
 	return 0;
+}
+
+
+void print(string msg, vector<int> vect) {
+	cout <<  msg << endl << "<";
+	for(int i = 0; i < vect.size() - 1; i++) {
+		cout << vect[i] << ", ";
+	}
+	cout << vect[vect.size() - 1] << ">" << endl;
 }
