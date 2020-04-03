@@ -28,7 +28,7 @@ private:
 
 public:
 	Board() { makeBoard(); };
-	Board(int arr[], std::string history);
+	Board(vector<int> temp);
 	Board(const Board & b);  //Create board from another board
 	std::string move(int m);  //m is which move.  Returns string describing move
 	std::string history(); //Returns the history of the board

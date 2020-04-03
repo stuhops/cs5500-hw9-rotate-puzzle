@@ -20,12 +20,13 @@ Board::Board(const Board & b) {
 }
 
 // Does not verify the incoming array is the correct size
-Board::Board(int arr[], string history) {
-	move_history = history;
-
-	for(int i = 0; i < SIZE; i++) {
-		for(int j = 0; j < SIZE; j++) {
-			board[i][j] = arr[j + i*SIZE];
+Board::Board(vector<int> temp) {
+	// move_history = history;
+	int pos = 0;
+	for(int i = 0; i < 3; i++) {
+		for(int j = 0; j < 3; j++) {
+			board[i][j] = temp[pos];
+			pos++;
 		}
 	}
 

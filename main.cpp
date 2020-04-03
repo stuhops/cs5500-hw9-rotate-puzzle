@@ -166,10 +166,7 @@ int main(int argc, char **argv) {
 		cout << "vector size" << temp.size() << endl;
 		int to_send = 0;
 		for(int i = 0; i < 9; i++) {
-			// cout << i <<  " : " << temp[i] << endl;
-			// print("vector before send", temp);
 			MPI_Send(&temp[i], 1, MPI_INT, 1, 0, MCW);
-			// print("vector after send", temp);
 		}
 		
 
@@ -179,11 +176,15 @@ int main(int argc, char **argv) {
 
 	// ----------------------------------- Slave Processes -------------------------------------
 	else {
-
-		cout << "I AM IN A DIFFERENT PROCESS" << endl;
+		Queue proccess_queue;
+		Board temp1;
+		Board temp2;
+		Board temp3;
+		Board temp4;
 		vector<int> subVector;
 		int data;
 		int pos = 0;
+		int state1 = 12;
 		
 		while(true){
 			MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);		
@@ -192,11 +193,13 @@ int main(int argc, char **argv) {
 				break;
 			}
 		}
-		print("This is my received data", subVector);
-		cout << rank << endl;
 
-		Board newBoard;
-		newBoard;
+		Board newBoard = Board(subVector);
+		cout << newBoard.toString() << endl;
+
+
+		
+		
 	}
 	
 	MPI_Finalize();
