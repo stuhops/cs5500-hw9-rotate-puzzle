@@ -29,6 +29,8 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MCW, &size);
 
 	if(!rank) {
+
+		cout << rank << endl;
 		//Variables:
 		int primary_board_sum = 0;
 		int num_of_levels = 0;
@@ -89,11 +91,13 @@ int main(int argc, char **argv) {
 		the_queue.addBoard(primary_board, state1);
 
 		//Check to see if they started with a perfect board.
-		if (perfect_board.operator==(primary_board))
+	// while(true){
+		if (perfect_board.operator==(primary_board)) {
 			std::cout << "You started with a perfect board." << endl;
+		}
 		//If not then solve for the starting puzzle.
 		else {
-			while (true) {
+			// while (true) {
 				num_of_levels++;
 				for (int i = 0; i < 3; i++) {
 						
@@ -143,6 +147,8 @@ int main(int argc, char **argv) {
 	
 				}
 				the_queue.deleteFirst();
+
+			
 	
 				//This program runs using integers. If the state counter is above 32,000 then it might cause overflow in many of the variables.
 				//With this overflow, this program becomes useless. Because of this we must quit the program.
@@ -150,23 +156,49 @@ int main(int argc, char **argv) {
 					std::cout << "The board entered either impossible to solve, or took to many moves to be solved by this program. Goodbye." << endl;
 					return 0;
 				}
-			}
+			// }
 		}
 		ident:
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
 		the_queue.clear();
+		vector<int> temp = temp1.toVect();
+		print("My temp vector", temp);
+		cout << "vector size" << temp.size() << endl;
 		int to_send = 0;
-		for(int i = 1; i < size; i++) {
-			MPI_Send(&to_send, 1, MPI_INT, i, 0, MCW);
+		for(int i = 0; i < 9; i++) {
+			// cout << i <<  " : " << temp[i] << endl;
+			// print("vector before send", temp);
+			MPI_Send(&temp[i], 1, MPI_INT, 1, 0, MCW);
+			// print("vector after send", temp);
 		}
+		
+
+
+
 	}
 
 	// ----------------------------------- Slave Processes -------------------------------------
 	else {
-		int data;
-		MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);
-	}
 
+		cout << "I AM IN A DIFFERENT PROCESS" << endl;
+		vector<int> subVector;
+		int data;
+		int pos = 0;
+		
+		while(true){
+			MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);		
+			subVector.push_back(data);
+			if(subVector.size() == 9 ){
+				break;
+			}
+		}
+		print("This is my received data", subVector);
+		cout << rank << endl;
+
+		Board newBoard;
+		newBoard;
+	}
+	
 	MPI_Finalize();
 	return 0;
 }
