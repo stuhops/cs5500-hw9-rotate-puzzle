@@ -5,6 +5,9 @@
 */
 
 #include "Board.h"
+#include <vector>
+
+using namespace std;
 
 //Copy constructor
 Board::Board(const Board & b) {
@@ -160,4 +163,14 @@ void Board::updateRank() {
 	}
 
 	rank = score;
+}
+
+vector<int> Board::toVect(){
+	vector<int> temp;
+	for(int i = 0; i < SIZE; i++){
+		for(int j = 0; j < SIZE; j++){
+			temp.push_back(board[i][j]);
+		}
+	}
+	return temp;
 }

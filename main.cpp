@@ -4,53 +4,67 @@
  * Last updated: 1/24/2018
 */
 
+#include <mpi.h>
+#include <iostream>
+#include <string>
+#include <vector>
 #include "Board.h"
 #include "Queue.h"
 #include "Board.cpp"
 #include "Queue.cpp"
-#include <iostream>
-#include <string>
 
 using namespace std;
 
-int main() {
-	//Variables:
-	int primary_board_sum = 0;
-	int num_of_levels = 0;
-	int input = 0;
-	int state1 = 0;
-	int again = 0;
-	std::string history_string = "";
-	int board_int = 0;
-	Board primary_board;
-	Board perfect_board;
-	Board temp1;
-	Board temp2;
-	Board temp3;
-	Board temp4;
-	Board start1;
-	Board start2;
-	Board start3;
-	Board start4;
-	Queue the_queue;
+#define MCW MPI_COMM_WORLD
 
-	//start1 set up
-	start1.rotateEast(1);
-	start1.rotateEast(2);
+void print(string message, vector<int> arr);
+void print(string message, int x);
+void printBreak();
 
-	//start2 set up
-	start2.rotateNorth(0);
-	start2.rotateSouth(2);
+int main(int argc, char **argv) {
+  int rank, size;
+  int data;
+  MPI_Init(&argc, &argv);
+  MPI_Comm_rank(MCW, &rank);
+  MPI_Comm_size(MCW, &size);
 
-	//start 3 set up
-	start3.rotateNorth(2);
-	start3.rotateSouth(0);
-	start3.rotateEast(0);
-	start3.rotateEast(2);
+	if(!rank) {
+		//Variables:
+		int primary_board_sum = 0;
+		int num_of_levels = 0;
+		int input = 0;
+		int state1 = 0;
+		int again = 0;
+		std::string history_string = "";
+		int board_int = 0;
+		Board primary_board;
+		Board perfect_board;
+		Board temp1;
+		Board temp2;
+		Board temp3;
+		Board temp4;
+		Board start1;
+		Board start2;
+		Board start3;
+		Board start4;
+		Queue the_queue;
 
-	//start 4 set up
-	start4.makeBoard(4);
-	while (true) {
+		//start1 set up
+		start1.rotateEast(1);
+		start1.rotateEast(2);
+
+		//start2 set up
+		start2.rotateNorth(0);
+		start2.rotateSouth(2);
+
+		//start 3 set up
+		start3.rotateNorth(2);
+		start3.rotateSouth(0);
+		start3.rotateEast(0);
+		start3.rotateEast(2);
+
+		//start 4 set up
+		start4.makeBoard(4);
 		//Print out the to the terminal to give the user options of boards to start from.
 		std::cout << endl << "Option 1: " << endl << start1.toString() << endl;
 		std::cout << endl << "Option 2: " << endl << start2.toString() << endl;
@@ -88,7 +102,7 @@ int main() {
 				temp1 = the_queue.getHeadBoardInfo();
 				temp1.move(4 * i + 0);	//Rotate North.
 				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
-								  << temp1.getRank() << endl
+									<< temp1.getRank() << endl
 									<< temp1.toString() << endl;
 				the_queue.addBoard(temp1, state1);
 				if (temp1.operator==(perfect_board))
@@ -99,7 +113,7 @@ int main() {
 				temp2 = the_queue.getHeadBoardInfo();
 				temp2.move(4 * i + 1);  //Rotate South.
 				std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp2.history() << endl 
-								  << temp2.getRank() << endl 
+									<< temp2.getRank() << endl 
 									<< temp2.toString() << endl;
 				the_queue.addBoard(temp2, state1);
 				if (temp2.operator==(perfect_board))
@@ -141,13 +155,39 @@ int main() {
 		ident:
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
 		the_queue.clear();
-
-		std::cout << endl << "Please enter a 0 to quit or a 1 to try another board: ";
-		std::cin >> again;
-		if (again == 0)
-			break;
-		state1 = 0;
+		int to_send = 0;
+		for(int i = 1; i < size; i++) {
+			MPI_Send(&to_send, 1, MPI_INT, i, 0, MCW);
+		}
 	}
-	std::cout << "Goodbye" << endl;
+
+	// ----------------------------------- Slave Processes -------------------------------------
+	else {
+		int data;
+		MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);
+	}
+
+	MPI_Finalize();
 	return 0;
+}
+
+
+
+// Print functions
+void print(string message, vector<int> vect) {
+  cout << message << ": " << endl;
+
+  cout << vect[0];
+  for(int i = 1; i < vect.size(); i++) {
+    cout << ", " << vect[i];
+  }
+  cout << endl;
+}
+
+void print(string message, int x) {
+  cout << message << ": " << x << endl;
+}
+
+void printBreak() {
+  cout << "\n--------------------------------\n";
 }
