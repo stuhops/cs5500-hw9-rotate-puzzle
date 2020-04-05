@@ -35,27 +35,23 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
 
-	if(!rank) {
-		//Variables:
-		int primary_board_sum = 0;
-		int num_of_levels = 0;
-		int state1 = 0;
-		int again = 0;
-		std::string history_string = "";
-		int board_int = 0;
-		Board primary_board;
-		Board temp1;
-		Queue the_queue;
+	int primary_board_sum = 0;
+	int num_of_levels = 0;
+	int state1 = 0;  // Depth of recursion
+	int again = 0;
+	std::string history_string = "";
+	int board_int = 0;
+	Board primary_board;
+	Board temp1;
+	Queue the_queue;
 
+	if(!rank) {
 		primary_board = initialize();
 		the_queue.addBoard(primary_board, state1);
 
-		//Check to see if they started with a perfect board.
-		if (!primary_board.getRank())
+		if (!primary_board.getRank()) {
 			std::cout << "You started with a perfect board." << endl;
-		//If not then solve for the starting puzzle.
-
-
+		}
 		else {
 			while (true) {
 				num_of_levels++;
