@@ -36,5 +36,6 @@ public:
 	void addBoard(Board new_board, int the_state);  //Adds a new board onto the tail of the queue.
 	void deleteFirst();								//Deletes the first node and places the head pointer onto the next in line.
 	void clear();									//Clears the queue.
+	bool isEmpty();
 }; 
 #endif

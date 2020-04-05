@@ -65,3 +65,7 @@ void Queue::clear() {
 	head = NULL;
 	tail = NULL;
 }
+
+bool Queue::isEmpty() {
+	return head == NULL;
+}
