@@ -35,9 +35,11 @@ int main(int argc, char **argv) {
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
 
+	const int ROWS = 3;
+	const int DIRECTIONS = 4;  // N, E, S, W
 	int primary_board_sum = 0;
 	int num_of_levels = 0;
-	int state1 = 0;  // Depth of recursion
+	int state1 = 0;
 	int again = 0;
 	std::string history_string = "";
 	int board_int = 0;
@@ -55,11 +57,11 @@ int main(int argc, char **argv) {
 		else {
 			while (true) {
 				num_of_levels++;
-				for (int i = 0; i < 3; i++) {
-					for (int j = 0; j < 4; j++) {
+				for (int i = 0; i < ROWS; i++) { 
+					for (int j = 0; j < DIRECTIONS; j++) {
 						state1++;
 						temp1 = the_queue.getHeadBoardInfo();
-						temp1.move(4 * i + j);
+						temp1.move(DIRECTIONS * i + j);
 						std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
 											<< temp1.getRank() << endl
 											<< temp1.toString() << endl;
