@@ -32,6 +32,7 @@ void printBreak();
 int main(int argc, char **argv) {
 	const int ROWS = 3;
 	const int DIRECTIONS = 4;  // N, E, S, W
+	const int ITERS = 1;
 
   int rank, size;
   int data[ROWS * ROWS];
@@ -71,9 +72,9 @@ int main(int argc, char **argv) {
 						state1++;
 						curr_board = queue[0];
 						curr_board.move(DIRECTIONS * i + j);
-						std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
-											<< curr_board.getRank() << endl
-											<< curr_board.toString() << endl;
+						// std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
+						// 					<< curr_board.getRank() << endl
+						// 					<< curr_board.toString() << endl;
 						queue.push_back(curr_board);
 						if (!curr_board.getRank()) {
 							break;
@@ -93,38 +94,39 @@ int main(int argc, char **argv) {
 				queue = prioritizeQueue(queue);
 
 				// ------------------------------- Send Work Out ------------------------------------
-				if(!(num_of_levels % 1)) {
+				if(!(num_of_levels % ITERS)) {
 					if(num_of_levels != 1) {
 						// ------------------ Receive --------------------
 						for(int i = 0; i < size; i++) {
-							// MPI_Test(&request, &finished, &status);
+							MPI_Test(&request, &finished, &status);
 							if(finished) {
+								std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
 								for(int j = 1; j < size; j++) {
 									MPI_Send(&finished, 1, MPI_INT, j, 1, MCW);
 								}
 								break;
 							}
 
-							// for(int j = 0; j < size; j++) {
-							// 	MPI_Recv(&data, ROWS * ROWS, MPI_INT, i, 0, MCW, MPI_STATUS_IGNORE);
-							// 	queue.push_back(Board(data));
-							// }
+							for(int j = 0; j < size; j++) {
+								MPI_Recv(&data, ROWS * ROWS, MPI_INT, i, 0, MCW, MPI_STATUS_IGNORE);
+								queue.push_back(Board(data));
+							}
 						}
-						// queue = prioritizeQueue(queue);
+						queue = prioritizeQueue(queue);
 					}
 
 					// --------------------- Send ----------------------
-					// vector<int> curr;
-					// for(int i = 1; i < size; i++) {
-					// 	curr = queue[0].toVect();
-					// 	queue.erase(queue.begin());
+					vector<int> curr;
+					for(int i = 1; i < size; i++) {
+						curr = queue[0].toVect();
+						queue.erase(queue.begin());
 
-					// 	int to_send[curr.size()];
-					// 	for(int j = 0; j < queue.size(); j++) {
-					// 		to_send[j] = curr[j];
-					// 	}
-					// 	MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
-					// }
+						int to_send[curr.size()];
+						for(int j = 0; j < queue.size(); j++) {
+							to_send[j] = curr[j];
+						}
+						MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
+					}
 
 					curr_board = queue[0];
 					queue.clear();
@@ -136,9 +138,6 @@ int main(int argc, char **argv) {
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
 		queue.clear();
 		int to_send = 0;
-		for(int i = 1; i < size; i++) {
-			MPI_Send(&to_send, 1, MPI_INT, i, 0, MCW);
-		}
 	}
 
 	// ----------------------------------- Slave Processes -------------------------------------
@@ -149,8 +148,51 @@ int main(int argc, char **argv) {
 			if(finished) 
 				break;
 
-			// int data;
-			// MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);
+			queue.clear();
+			MPI_Recv(&data, ROWS * ROWS, MPI_INT, 0, 0, MCW, MPI_STATUS_IGNORE);
+			cout << rank << " Data Received" << endl;
+			queue.push_back(Board(data));
+
+			for(int iters = 0; iters < ITERS; iters++) {
+				for (int i = 0; i < ROWS; i++) { 
+					for (int j = 0; j < DIRECTIONS; j++) {
+						state1++;
+						curr_board = queue[0];
+						curr_board.move(DIRECTIONS * i + j);
+						// std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
+						// 					<< curr_board.getRank() << endl
+						// 					<< curr_board.toString() << endl;
+						queue.push_back(curr_board);
+						if (!curr_board.getRank()) {
+							break;
+						}
+					}
+					if (!curr_board.getRank()) break;
+				}
+				queue.erase(queue.begin());
+				if (!curr_board.getRank()) {
+					finished = 1;
+					MPI_Send(&finished, 1, MPI_INT, 0, 1, MCW);
+					break;
+				}
+
+				queue = prioritizeQueue(queue);
+			}
+			if (!curr_board.getRank()) break;
+
+
+			vector<int> curr;
+			for(int i = 0; i < size; i++) {
+				curr = queue[0].toVect();
+				queue.erase(queue.begin());
+
+				int to_send[curr.size()];
+				for(int j = 0; j < queue.size(); j++) {
+					to_send[j] = curr[j];
+				}
+				MPI_Send(&to_send, ROWS * ROWS, MPI_INT, 0, 0, MCW);
+			}
+
 		}
 	}
 

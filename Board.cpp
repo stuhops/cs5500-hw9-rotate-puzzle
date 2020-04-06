@@ -35,6 +35,7 @@ Board::Board(int arr[], string history) {
 
 Board::Board(int arr[]) {
 	move_history = "BLANK";
+	state = -1;
 
 	for(int i = 0; i < SIZE; i++) {
 		for(int j = 0; j < SIZE; j++) {
