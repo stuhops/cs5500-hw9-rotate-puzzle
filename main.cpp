@@ -5,7 +5,6 @@
 */
 
 #include <mpi.h>
-#include <bits/stdc++.h> 
 #include <iostream>
 #include <string>
 #include <vector>
