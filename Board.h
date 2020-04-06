@@ -18,7 +18,7 @@ using namespace std;
 
 class Board {
 private:
-	static const int SIZE = 3;
+	static const int SIZE = 5;
 	int board[SIZE][SIZE];  // Values of board
 	std::string move_history;
 	int state;
@@ -28,6 +28,7 @@ private:
 
 public:
 	Board() { makeBoard(); };
+	Board(int jumble_cnt) { makeBoard(jumble_cnt); }
 	Board(int arr[], std::string history);
 	Board(int arr[]);
 	Board(const Board & b);  //Create board from another board

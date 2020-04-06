@@ -108,6 +108,7 @@ void Board::makeBoard(int jumbleCt) {
 void Board::jumble(int ct) {
 	for (int i = 0; i < ct; i++)
 		move(rand() % (SIZE * 4));
+	move_history = "";
 }
 
 //Rotate East using row specified

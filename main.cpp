@@ -30,9 +30,9 @@ void printBreak();
 
 // --------------------------------- Main -------------------------------------------
 int main(int argc, char **argv) {
-	const int ROWS = 3;
+	const int ROWS = 5;
 	const int DIRECTIONS = 4;  // N, E, S, W
-	const int ITERS = 1;
+	const int ITERS = 5;
 
   int rank, size;
   int data[ROWS * ROWS];
@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
 		else {
 			while (true) {
 				num_of_levels++;
+				// printQueue(queue);
 
 				for (int i = 0; i < ROWS; i++) { 
 					for (int j = 0; j < DIRECTIONS; j++) {
@@ -94,9 +95,10 @@ int main(int argc, char **argv) {
 				}
 
 				queue = prioritizeQueue(queue);
+				queue.resize(size);
 
 				// ------------------------------- Send Work Out ------------------------------------
-				if(!(num_of_levels % ITERS)) {
+				if(!(num_of_levels % ITERS) || num_of_levels == 1) {
 					if(num_of_levels != 1) {
 						// ------------------ Receive --------------------
 						for(int i = 1; i < size; i++) {
@@ -111,14 +113,20 @@ int main(int argc, char **argv) {
 									break;
 								}
 								else if(workFlag) {
+									workFlag = 0;
 									break;
 								}
 							}
 							if(finished) break;
 
 							for(int j = 0; j < size; j++) {
+								std::cout << rank << " Ready to receive " << i << endl;
 								MPI_Recv(&data, ROWS * ROWS, MPI_INT, i, 0, MCW, MPI_STATUS_IGNORE);
+								std::cout << rank << " Received " << i << endl;
+								// printQueue(queue);
 								queue.push_back(Board(data));
+								std::cout << rank << " Here " << endl;
+								// printQueue(queue);
 							}
 						}
 						queue = prioritizeQueue(queue);
@@ -126,13 +134,14 @@ int main(int argc, char **argv) {
 					if(finished) break;
 
 					// --------------------- Send ----------------------
+					cout << "Level: " << num_of_levels << endl;
 					vector<int> curr;
 					for(int i = 1; i < size; i++) {
 						curr = queue[0].toVect();
 						queue.erase(queue.begin());
 
 						int to_send[curr.size()];
-						for(int j = 0; j < queue.size(); j++) {
+						for(int j = 0; j < curr.size(); j++) {
 							to_send[j] = curr[j];
 						}
 						MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
@@ -167,6 +176,15 @@ int main(int argc, char **argv) {
 				if(workFlag) {
 					workFlag = 0;
 					cout << rank << " Data Received" << endl;
+					// if(rank == 1) {
+					// 	std::cout << "Incoming array: " << endl;
+					// 	for(int i = 0; i < ROWS; i++) {
+					// 		for(int j = 0; j < ROWS; j++) {
+					// 			std::cout << data[j + i*ROWS] << "  ";
+					// 		}
+					// 		std::cout << endl;
+					// 	}
+					// }
 					queue.push_back(Board(data));
 					break;
 				}
@@ -254,7 +272,7 @@ Board initialize() {
 	start3.rotateEast(2);
 
 	//start 4 set up
-	start4.makeBoard(4);
+	start4.makeBoard(10);
 	//Print out the to the terminal to give the user options of boards to start from.
 	std::cout << endl << "Option 1: " << endl << start1.toString() << endl;
 	std::cout << endl << "Option 2: " << endl << start2.toString() << endl;
