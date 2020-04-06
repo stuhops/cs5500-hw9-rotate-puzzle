@@ -45,6 +45,9 @@ public:
 
 	void addHistory(std::string new_history); //Adds to the history string.
 
+	bool operator <(const Board& b) { return (rank < b.rank); }
+	bool operator >(const Board& b) { return (rank > b.rank); }
+
 	int getState();
 	int getRank() { return rank; };
 

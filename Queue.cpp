@@ -52,6 +52,7 @@ void Queue::deleteFirst() {
 	tmp = head;
 	if (head->next_node != NULL)
 		head = head->next_node;
+	else head = NULL;
 	delete tmp;
 }
 

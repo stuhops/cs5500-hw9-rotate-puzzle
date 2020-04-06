@@ -5,6 +5,7 @@
 */
 
 #include <mpi.h>
+#include <bits/stdc++.h> 
 #include <iostream>
 #include <string>
 #include <vector>
@@ -19,11 +20,14 @@ using namespace std;
 
 
 // ------------------------------- Functions ----------------------------------------
-bool sortBoards(Board b1, Board b2) { return b1.getRank() < b1.getRank(); }
 Board initialize();
+
+vector<Board> prioritizeBoards(vector<Board> vect);
 
 void print(string message, vector<int> arr);
 void print(string message, int x);
+void printQueue(vector<Board> queue);
+void printQueueRanks(vector<Board> queue);
 void printBreak();
 
 
@@ -45,11 +49,11 @@ int main(int argc, char **argv) {
 	int board_int = 0;
 	Board primary_board;
 	Board temp1;
-	Queue the_queue;
+	vector<Board> queue;
 
 	if(!rank) {
 		primary_board = initialize();
-		the_queue.addBoard(primary_board, state1);
+		queue.push_back(primary_board);
 
 		if (!primary_board.getRank()) {
 			std::cout << "You started with a perfect board." << endl;
@@ -60,27 +64,48 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < ROWS; i++) { 
 					for (int j = 0; j < DIRECTIONS; j++) {
 						state1++;
-						temp1 = the_queue.getHeadBoardInfo();
+						temp1 = queue[0];
 						temp1.move(DIRECTIONS * i + j);
-						std::cout << "State " << state1 << " from state " << the_queue.getHeadBoardState() << " History " << temp1.history() << endl
+						std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << temp1.history() << endl
 											<< temp1.getRank() << endl
 											<< temp1.toString() << endl;
-						the_queue.addBoard(temp1, state1);
+						queue.push_back(temp1);
 						if (!temp1.getRank()) {
 							break;
 						}
 					}
 					if (!temp1.getRank()) break;
 				}
-				the_queue.deleteFirst();
+				queue.erase(queue.begin());
 				if (!temp1.getRank()) break;
 
 				// if num_of_levels % 3 receive all, do work then send more out
+				if(num_of_levels == 1) {
+					bool flag = false;
+					vector<Board> new_queue;
+					new_queue.push_back(queue[0]);
+					for(int i = 1; i < queue.size(); i++) {
+						flag = false;
+						for(int j = 0; j < new_queue.size(); j++) {
+							// cout << endl << queue[i].getRank() << endl;
+							if(queue[i].getRank() < new_queue[j].getRank()) {
+								flag = true;
+								new_queue.insert(new_queue.begin() + j, queue[i]);
+								break;
+							}
+						}
+						if(!flag) {
+							new_queue.push_back(queue[i]);
+						}
+					}
+					queue = new_queue;
+					printQueue(queue);
+				}
 			}
 		}
 		ident:
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
-		the_queue.clear();
+		queue.clear();
 		int to_send = 0;
 		for(int i = 1; i < size; i++) {
 			MPI_Send(&to_send, 1, MPI_INT, i, 0, MCW);
@@ -147,6 +172,27 @@ Board initialize() {
 }
 
 
+vector<Board> prioritizeBoards(vector<Board> vect) {
+	bool flag = false;
+	for(int i = 1; i < vect.size(); i++) {
+		for(int j = 0; j < vect.size(); j++) {
+			// cout << endl << vect[i].getRank() << endl;
+			if(vect[i].getRank() < vect[j].getRank()) {
+				vect.insert(vect.begin() + j, vect[i]);
+			}
+		}
+	}
+
+	printBreak();
+	cout << endl << "prioritized: " << endl;
+	for(int i = 0; i < vect.size(); i++) {
+		cout << vect[i].getRank() << endl;
+	}
+	cout << endl << endl;
+	return vect;
+}
+
+
 // Print functions
 void print(string message, vector<int> vect) {
   cout << message << ": " << endl;
@@ -160,6 +206,26 @@ void print(string message, vector<int> vect) {
 
 void print(string message, int x) {
   cout << message << ": " << x << endl;
+}
+
+
+void printQueue(vector<Board> queue) {
+	printBreak();
+	cout << "Queue Ranks and Boards: " << endl;
+	for(int i = 0; i < queue.size(); i++) {
+		cout << queue[i].getRank() << endl
+				 << queue[i].toString() << endl << endl;
+	}
+	printBreak();
+}
+
+void printQueueRanks(vector<Board> queue) {
+	printBreak();
+	cout << endl << "Queue Ranks: " << endl;
+	for(int i = 0; i < queue.size(); i++) {
+		cout << queue[i].getRank() << ", ";
+	}
+	printBreak();
 }
 
 void printBreak() {
