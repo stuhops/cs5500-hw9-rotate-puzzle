@@ -12,7 +12,6 @@
 #include "Board.h"
 #include "Queue.h"
 #include "Board.cpp"
-#include "Queue.cpp"
 
 using namespace std;
 
