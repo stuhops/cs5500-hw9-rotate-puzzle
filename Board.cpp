@@ -33,6 +33,18 @@ Board::Board(int arr[], string history) {
 	updateRank();
 }
 
+Board::Board(int arr[]) {
+	move_history = "BLANK";
+
+	for(int i = 0; i < SIZE; i++) {
+		for(int j = 0; j < SIZE; j++) {
+			board[i][j] = arr[j + i*SIZE];
+		}
+	}
+
+	updateRank();
+}
+
 // Make one move.  m indicates which move is wanted. Return string describing the move
 std::string Board::move(int m) {
 	std::stringstream ss;

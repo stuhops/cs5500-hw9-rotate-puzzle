@@ -30,14 +30,18 @@ void printBreak();
 
 // --------------------------------- Main -------------------------------------------
 int main(int argc, char **argv) {
+	const int ROWS = 3;
+	const int DIRECTIONS = 4;  // N, E, S, W
+
   int rank, size;
-  int data;
+  int data[ROWS * ROWS];
   MPI_Init(&argc, &argv);
   MPI_Comm_rank(MCW, &rank);
   MPI_Comm_size(MCW, &size);
+	MPI_Request request;
+	MPI_Status status;
 
-	const int ROWS = 3;
-	const int DIRECTIONS = 4;  // N, E, S, W
+	int finished = 0;
 	int primary_board_sum = 0;
 	int num_of_levels = 0;
 	int state1 = 0;
@@ -45,10 +49,14 @@ int main(int argc, char **argv) {
 	std::string history_string = "";
 	int board_int = 0;
 	Board primary_board;
-	Board temp1;
+	Board curr_board;
 	vector<Board> queue;
 
 	if(!rank) {
+		for(int i = 0; i < size; i++) {
+			MPI_Irecv(&finished, 1, MPI_INT, MPI_ANY_SOURCE, 1, MCW, &request);
+		}
+
 		primary_board = initialize();
 		queue.push_back(primary_board);
 
@@ -61,22 +69,68 @@ int main(int argc, char **argv) {
 				for (int i = 0; i < ROWS; i++) { 
 					for (int j = 0; j < DIRECTIONS; j++) {
 						state1++;
-						temp1 = queue[0];
-						temp1.move(DIRECTIONS * i + j);
-						std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << temp1.history() << endl
-											<< temp1.getRank() << endl
-											<< temp1.toString() << endl;
-						queue.push_back(temp1);
-						if (!temp1.getRank()) {
+						curr_board = queue[0];
+						curr_board.move(DIRECTIONS * i + j);
+						std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
+											<< curr_board.getRank() << endl
+											<< curr_board.toString() << endl;
+						queue.push_back(curr_board);
+						if (!curr_board.getRank()) {
 							break;
 						}
 					}
-					if (!temp1.getRank()) break;
+					if (!curr_board.getRank()) break;
 				}
 				queue.erase(queue.begin());
-				if (!temp1.getRank()) break;
+				if (!curr_board.getRank()) {
+					finished = 1;
+					for(int j = 1; j < size; j++) {
+						MPI_Send(&finished, 1, MPI_INT, j, 1, MCW);
+					}
+					break;
+				}
 
 				queue = prioritizeQueue(queue);
+
+				// ------------------------------- Send Work Out ------------------------------------
+				if(!(num_of_levels % 1)) {
+					if(num_of_levels != 1) {
+						// ------------------ Receive --------------------
+						for(int i = 0; i < size; i++) {
+							// MPI_Test(&request, &finished, &status);
+							if(finished) {
+								for(int j = 1; j < size; j++) {
+									MPI_Send(&finished, 1, MPI_INT, j, 1, MCW);
+								}
+								break;
+							}
+
+							// for(int j = 0; j < size; j++) {
+							// 	MPI_Recv(&data, ROWS * ROWS, MPI_INT, i, 0, MCW, MPI_STATUS_IGNORE);
+							// 	queue.push_back(Board(data));
+							// }
+						}
+						// queue = prioritizeQueue(queue);
+					}
+
+					// --------------------- Send ----------------------
+					// vector<int> curr;
+					// for(int i = 1; i < size; i++) {
+					// 	curr = queue[0].toVect();
+					// 	queue.erase(queue.begin());
+
+					// 	int to_send[curr.size()];
+					// 	for(int j = 0; j < queue.size(); j++) {
+					// 		to_send[j] = curr[j];
+					// 	}
+					// 	MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
+					// }
+
+					curr_board = queue[0];
+					queue.clear();
+					queue.push_back(curr_board);
+				}
+				if(finished) break;
 			}
 		}
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
@@ -89,8 +143,15 @@ int main(int argc, char **argv) {
 
 	// ----------------------------------- Slave Processes -------------------------------------
 	else {
-		int data;
-		MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);
+		MPI_Irecv(&finished, 1, MPI_INT, 0, 1, MCW, &request);
+		while(true) {
+			MPI_Test(&request, &finished, &status);
+			if(finished) 
+				break;
+
+			// int data;
+			// MPI_Recv(&data, 1, MPI_INT, MPI_ANY_SOURCE, 0, MCW, MPI_STATUS_IGNORE);
+		}
 	}
 
 	MPI_Finalize();
