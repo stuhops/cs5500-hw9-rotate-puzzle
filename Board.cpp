@@ -17,6 +17,7 @@ Board::Board(const Board & b) {
 		for (int j = 0; j < SIZE; j++)
 			board[i][j] = b.board[i][j];
 	move_history = b.move_history;
+	updateRank();
 }
 
 // Does not verify the incoming array is the correct size
@@ -87,6 +88,7 @@ void Board::makeBoard(int jumbleCt) {
 		for (int j = 0; j < SIZE; j++)
 			board[i][j] = val++;
 	jumble(jumbleCt);
+	updateRank();
 }
 
 // Randomly apply ct moves to the board
