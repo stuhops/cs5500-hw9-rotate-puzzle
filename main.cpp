@@ -103,7 +103,6 @@ int main(int argc, char **argv) {
 				}
 			}
 		}
-		ident:
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
 		queue.clear();
 		int to_send = 0;
@@ -214,6 +213,7 @@ void printQueue(vector<Board> queue) {
 	cout << "Queue Ranks and Boards: " << endl;
 	for(int i = 0; i < queue.size(); i++) {
 		cout << queue[i].getRank() << endl
+				 << queue[i].history() << endl
 				 << queue[i].toString() << endl << endl;
 	}
 	printBreak();
