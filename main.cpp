@@ -9,7 +9,6 @@
 #include <string>
 #include <vector>
 #include "Board.h"
-#include "Queue.h"
 #include "Board.cpp"
 
 using namespace std;
@@ -20,7 +19,7 @@ using namespace std;
 // ------------------------------- Functions ----------------------------------------
 Board initialize();
 
-vector<Board> prioritizeBoards(vector<Board> vect);
+vector<Board> prioritizeQueue(vector<Board> queue);
 
 void print(string message, vector<int> arr);
 void print(string message, int x);
@@ -77,28 +76,7 @@ int main(int argc, char **argv) {
 				queue.erase(queue.begin());
 				if (!temp1.getRank()) break;
 
-				// if num_of_levels % 3 receive all, do work then send more out
-				if(num_of_levels == 1) {
-					bool flag = false;
-					vector<Board> new_queue;
-					new_queue.push_back(queue[0]);
-					for(int i = 1; i < queue.size(); i++) {
-						flag = false;
-						for(int j = 0; j < new_queue.size(); j++) {
-							// cout << endl << queue[i].getRank() << endl;
-							if(queue[i].getRank() < new_queue[j].getRank()) {
-								flag = true;
-								new_queue.insert(new_queue.begin() + j, queue[i]);
-								break;
-							}
-						}
-						if(!flag) {
-							new_queue.push_back(queue[i]);
-						}
-					}
-					queue = new_queue;
-					printQueue(queue);
-				}
+				queue = prioritizeQueue(queue);
 			}
 		}
 		std::cout << "YOU WIN!!! Original Board:" << endl << primary_board.toString() << endl;
@@ -169,24 +147,25 @@ Board initialize() {
 }
 
 
-vector<Board> prioritizeBoards(vector<Board> vect) {
+vector<Board> prioritizeQueue(vector<Board> queue) {
 	bool flag = false;
-	for(int i = 1; i < vect.size(); i++) {
-		for(int j = 0; j < vect.size(); j++) {
-			// cout << endl << vect[i].getRank() << endl;
-			if(vect[i].getRank() < vect[j].getRank()) {
-				vect.insert(vect.begin() + j, vect[i]);
+	vector<Board> new_queue;
+	new_queue.push_back(queue[0]);
+	for(int i = 1; i < queue.size(); i++) {
+		flag = false;
+		for(int j = 0; j < new_queue.size(); j++) {
+			// cout << endl << queue[i].getRank() << endl;
+			if(queue[i].getRank() < new_queue[j].getRank()) {
+				flag = true;
+				new_queue.insert(new_queue.begin() + j, queue[i]);
+				break;
 			}
 		}
+		if(!flag) {
+			new_queue.push_back(queue[i]);
+		}
 	}
-
-	printBreak();
-	cout << endl << "prioritized: " << endl;
-	for(int i = 0; i < vect.size(); i++) {
-		cout << vect[i].getRank() << endl;
-	}
-	cout << endl << endl;
-	return vect;
+	return new_queue;
 }
 
 
