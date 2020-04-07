@@ -20,6 +20,7 @@ class Board {
 private:
 	static const int SIZE = 5;
 	int board[SIZE][SIZE];  // Values of board
+	int last_move[2] = {-1, -1};  // <Row, Direction>
 	std::string move_history;
 	int state;
 	int rank;
@@ -49,6 +50,8 @@ public:
 
 	int getState();
 	int getRank() { return rank; };
+	void printLastMove() { cout << "Last Move: [" << last_move[0] << ", " << last_move[1] << "]" << endl; }
+	bool isReversal(int arr[]);
 
 	void changeState(int new_state);
 };
