@@ -94,7 +94,10 @@ int main(int argc, char **argv) {
 								curr_board.printLastMove();
 
 								// <<<<<<<<<<<<<<<<<<<<<<<< TODO: THIS IS WHERE THE LAST MOVE FUNCTION IS GETTING DISRUPTED. FIGURE IT OUT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-								queue.push_back(curr_board);
+								Board tmp;
+								queue.push_back(tmp);
+								queue[queue.size() - 1] = curr_board;
+								// queue.push_back(curr_board);
 								cout << "After adding to vect: ";
 								queue[queue.size() - 1].printLastMove();
 								if (!curr_board.getRank()) {
