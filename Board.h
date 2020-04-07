@@ -20,7 +20,6 @@ class Board {
 private:
 	static const int SIZE = 5;
 	int board[SIZE][SIZE];  // Values of board
-	// int last_move[2] = {-1, -1};  // <Row, Direction>
 	int last_move_row;
 	int last_move_direction;
 	std::string move_history;

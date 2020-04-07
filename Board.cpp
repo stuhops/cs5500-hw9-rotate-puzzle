@@ -64,7 +64,6 @@ std::string Board::move(int m) {
 	case 2:  rotateEast(sub); ss << ">" << sub; break;
 	case 3:  rotateWest(sub); ss << "<" << sub; break;
 	}
-	cout << "From Move: [" << last_move_row << ", " << last_move_direction << "]" << endl;
 	addHistory(ss.str());
 	updateRank();
 	last_move_row = sub;
@@ -79,8 +78,6 @@ std::string Board::history() {
 // Create a printable representation of the Board class
 std::string Board::toString() const {
 	std::stringstream ss;
-	// TODO: REMOVE THIS
-	ss << "last move: [" << last_move_row << ", " << last_move_direction << "]" << std::endl;
 	for (int i=0; i < SIZE; i++)
 	{
 		for (int j = 0; j < SIZE; j++)
@@ -205,10 +202,6 @@ vector<int> Board::toVect(){
 }
 
 bool Board::isReversal(int arr[]) {
-	cout << "LOOK: [" << last_move_row << ", " << last_move_direction << "]" << " = [" << arr[0] << ", " << arr[1] << "]" << std::endl;
-	if(last_move_row == -1) {
-		// cout << "ERROR THE LAST MOVE ARRAY IS NOT SET CORRECTLY" << endl;
-	}
 	if(arr[0] != last_move_row) 
 		return false;
 	

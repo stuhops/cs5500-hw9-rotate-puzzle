@@ -79,7 +79,6 @@ int main(int argc, char **argv) {
 					int queue_length = queue.size();
 					for(int b = 0; b < queue_length; b++) {
 
-						cout << queue[0].toString() << endl << endl;
 						for (int i = 0; i < ROWS; i++) { 
 							for (int j = 0; j < DIRECTIONS; j++) {
 								state1++;
@@ -89,19 +88,12 @@ int main(int argc, char **argv) {
 								int next_move_arr[2] = {next_move / 4, next_move % 4};
 								if(!curr_board.isReversal(next_move_arr)) {
 									curr_board.move(next_move);
-								}
-								cout << "After move: ";
-								curr_board.printLastMove();
 
-								// <<<<<<<<<<<<<<<<<<<<<<<< TODO: THIS IS WHERE THE LAST MOVE FUNCTION IS GETTING DISRUPTED. FIGURE IT OUT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-								Board tmp;
-								queue.push_back(tmp);
-								queue[queue.size() - 1] = curr_board;
-								// queue.push_back(curr_board);
-								cout << "After adding to vect: ";
-								queue[queue.size() - 1].printLastMove();
-								if (!curr_board.getRank()) {
-									break;
+									// <<<<<<<<<<<<<<<<<<<<<<<< TODO: THIS IS WHERE THE LAST MOVE FUNCTION IS GETTING DISRUPTED. FIGURE IT OUT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+									queue.push_back(curr_board);
+									if (!curr_board.getRank()) {
+										break;
+									}
 								}
 							}
 							if (!curr_board.getRank()) break;
@@ -116,15 +108,12 @@ int main(int argc, char **argv) {
 						}
 					}
 					if (!curr_board.getRank()) break;
-					printQueue(queue);
-					while(true) {};
 				}
 				if (!curr_board.getRank()) break;
 
 				queue = prioritizeQueue(queue);
 				if(queue.size() > ROWS * ROWS) 
 					queue.resize(ROWS * ROWS);
-				printQueue(queue);
 
 				// ------------------------------- Send Work Out ------------------------------------
 				if(!(num_of_levels % ITERS) || num_of_levels == 1) {
@@ -158,7 +147,7 @@ int main(int argc, char **argv) {
 						queue = prioritizeQueue(queue);
 						queue.resize(size);
 						// printQueue(queue);
-						if(num_of_levels / 5 > 5) {
+						if(num_of_levels / 5 > 10) {
 							std::cout << "HIT LIMIT" << endl;
 							while(true){};
 						}
