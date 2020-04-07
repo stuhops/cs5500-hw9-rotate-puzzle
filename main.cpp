@@ -89,7 +89,6 @@ int main(int argc, char **argv) {
 								if(!curr_board.isReversal(next_move_arr)) {
 									curr_board.move(next_move);
 
-									// <<<<<<<<<<<<<<<<<<<<<<<< TODO: THIS IS WHERE THE LAST MOVE FUNCTION IS GETTING DISRUPTED. FIGURE IT OUT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 									queue.push_back(curr_board);
 									if (!curr_board.getRank()) {
 										break;
@@ -146,7 +145,7 @@ int main(int argc, char **argv) {
 						}
 						queue = prioritizeQueue(queue);
 						queue.resize(size);
-						// printQueue(queue);
+						printQueue(queue);
 						if(num_of_levels / 5 > 10) {
 							std::cout << "HIT LIMIT" << endl;
 							while(true){};
