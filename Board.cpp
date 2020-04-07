@@ -17,12 +17,16 @@ Board::Board(const Board & b) {
 		for (int j = 0; j < SIZE; j++)
 			board[i][j] = b.board[i][j];
 	move_history = b.move_history;
+	last_move_row = b.last_move_row;
+	last_move_direction = b.last_move_direction;
 	updateRank();
 }
 
 // Does not verify the incoming array is the correct size
 Board::Board(int arr[], string history) {
 	move_history = history;
+	last_move_row = -1;
+	last_move_direction = -1;
 
 	for(int i = 0; i < SIZE; i++) {
 		for(int j = 0; j < SIZE; j++) {
@@ -36,6 +40,8 @@ Board::Board(int arr[], string history) {
 Board::Board(int arr[]) {
 	move_history = "BLANK";
 	state = -1;
+	last_move_row = -1;
+	last_move_direction = -1;
 
 	for(int i = 0; i < SIZE; i++) {
 		for(int j = 0; j < SIZE; j++) {
@@ -60,6 +66,8 @@ std::string Board::move(int m) {
 	}
 	addHistory(ss.str());
 	updateRank();
+	last_move_row = sub;
+	last_move_direction = m % 4;
 	return ss.str();
 }
 
@@ -102,12 +110,15 @@ void Board::makeBoard(int jumbleCt) {
 			board[i][j] = val++;
 	jumble(jumbleCt);
 	updateRank();
+	last_move_row = -1;
+	last_move_direction = -1;
 }
 
 // Randomly apply ct moves to the board
 void Board::jumble(int ct) {
 	for (int i = 0; i < ct; i++)
 		move(rand() % (SIZE * 4));
+	move_history = "";
 }
 
 //Rotate East using row specified
@@ -188,4 +199,17 @@ vector<int> Board::toVect(){
 		}
 	}
 	return temp;
+}
+
+bool Board::isReversal(int arr[]) {
+	if(arr[0] != last_move_row) 
+		return false;
+	
+	switch (arr[1]) {
+		case 0:  return (last_move_direction == 1);
+		case 1:  return (last_move_direction == 0);
+		case 2:  return (last_move_direction == 3);
+		case 3:  return (last_move_direction == 2);
+	}
+	return false;
 }

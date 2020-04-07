@@ -18,8 +18,10 @@ using namespace std;
 
 class Board {
 private:
-	static const int SIZE = 3;
+	static const int SIZE = 5;
 	int board[SIZE][SIZE];  // Values of board
+	int last_move_row;
+	int last_move_direction;
 	std::string move_history;
 	int state;
 	int rank;
@@ -28,6 +30,7 @@ private:
 
 public:
 	Board() { makeBoard(); };
+	Board(int jumble_cnt) { makeBoard(jumble_cnt); }
 	Board(int arr[], std::string history);
 	Board(int arr[]);
 	Board(const Board & b);  //Create board from another board
@@ -48,6 +51,8 @@ public:
 
 	int getState();
 	int getRank() { return rank; };
+	void printLastMove() { cout << "Last Move: [" << last_move_row << ", " << last_move_direction << "]" << endl; }
+	bool isReversal(int arr[]);
 
 	void changeState(int new_state);
 };
