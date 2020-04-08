@@ -20,10 +20,12 @@ using namespace std;
 Board initialize();
 
 vector<Board> prioritizeQueue(vector<Board> queue);
-
+// vector<Board> receiveQueue(vector<Board> queue, int data[], int ROWS, int size, int finished, int workFlag);
+int checkSameRank(vector<Board> queue);
+vector<Board> splitBoard(vector<Board> queue);
 void print(string message, vector<int> arr);
 void print(string message, int x);
-void printQueue(vector<Board> queue);
+void printQueue(vector<Board> queue, int rank);
 void printQueueRanks(vector<Board> queue);
 void printBreak();
 
@@ -70,17 +72,19 @@ int main(int argc, char **argv) {
 				// ----------------------------------------- Master Move ------------------------------------------
 				for(int a = 0; a < ITERS; a++) {
 					num_of_levels++;
-					std::cout << "Level " << num_of_levels << endl;
+					// std::cout << "Level " << num_of_levels << endl;
 
 					// if(num_of_levels > 1) {
 					// 	int test_next_move[2] = {-1, -1};
 					// 	assert(!queue[0].isReversal(test_next_move));
 					// }
 					int queue_length = queue.size();
+					cout << "QUEUE LENGTH " << queue_length << endl; 
 					for(int b = 0; b < queue_length; b++) {
 
 						for (int i = 0; i < ROWS; i++) { 
 							for (int j = 0; j < DIRECTIONS; j++) {
+								// cout << ROWS << " " << DIRECTIONS << endl;
 								state1++;
 								curr_board = queue[0];
 
@@ -118,6 +122,8 @@ int main(int argc, char **argv) {
 				if(!(num_of_levels % ITERS) || num_of_levels == 1) {
 					if(num_of_levels != ITERS) {
 						// ------------------ Receive --------------------
+
+						// queue = receiveQueue(queue, data, ROWS, size, finished, workFlag);
 						for(int i = 1; i < size; i++) {
 							// std::cout << "Pre-Wait" << endl;
 							while(true) {
@@ -145,7 +151,9 @@ int main(int argc, char **argv) {
 						}
 						queue = prioritizeQueue(queue);
 						queue.resize(size);
-						printQueue(queue);
+						// printQueueRanks(queue);
+						// printQueue(queue, rank);
+						// primary_board.toString();
 						if(num_of_levels / 5 > 10) {
 							std::cout << "HIT LIMIT" << endl;
 							while(true){};
@@ -155,6 +163,9 @@ int main(int argc, char **argv) {
 
 					// --------------------- Send ----------------------
 					vector<int> curr;
+					int diverse = checkSameRank(queue);
+					cout << "IS QUEUE Diverse " << diverse << endl;
+					// if(diverse){
 					for(int i = 1; i < size; i++) {
 						curr = queue[0].toVect();
 						queue.erase(queue.begin());
@@ -165,6 +176,24 @@ int main(int argc, char **argv) {
 						}
 						MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
 					}
+					// }
+					// else{									// If queue has all same rank, perform moves on first board in 
+					// 	cout << "DIVERSIFYING" << endl;		// queue to create boards for new queue that have different rank.
+					// 	queue = splitBoard(queue);
+					// 	int isDiverse = checkSameRank(queue);
+					// 	cout << "IS QUEUE DIVERSE " << isDiverse << endl;
+					// 	for(int i = 1; i < size; i++) {
+					// 		curr = queue[0].toVect();
+					// 		queue.erase(queue.begin());
+
+					// 		int to_send[curr.size()];
+					// 		for(int j = 0; j < curr.size(); j++) {
+					// 			to_send[j] = curr[j];
+					// 		}
+					// 		MPI_Send(&to_send, ROWS * ROWS, MPI_INT, i, 0, MCW);
+					// 	}
+					// }
+					
 					curr_board = queue[0];
 					queue.clear();
 					queue.push_back(curr_board);
@@ -210,7 +239,13 @@ int main(int argc, char **argv) {
 			}
 
 			// cout << rank << endl;
+			
+			// print("received queue", queue);
+			// cout<<"received at " << rank << endl;
 			// cout << queue[0].toString() << endl;
+			// cout <<  primary_board.toString() << endl;
+
+			// printQueue(queue);
 
 			for(int a = 0; a < ITERS; a++) {
 				int queue_length = queue.size();
@@ -226,15 +261,25 @@ int main(int argc, char **argv) {
 						for (int j = 0; j < DIRECTIONS; j++) {
 							state1++;
 							curr_board = queue[0];
-							curr_board.move(DIRECTIONS * i + j);
-							// std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
-							// 					<< curr_board.getRank() << endl
-							// 					<< curr_board.toString() << endl;
-							queue.push_back(curr_board);
-							if (!curr_board.getRank()) {
-								std::cout << rank << " Send Finished Signal" << endl;
-								break;
+							int next_move = DIRECTIONS * i + j;
+							int next_move_arr[2] = {next_move / 4, next_move % 4};
+							if(!curr_board.isReversal(next_move_arr)) {
+								curr_board.move(next_move);
+
+								queue.push_back(curr_board);
+								if (!curr_board.getRank()) {
+									break;
+								}
 							}
+							// curr_board.move(DIRECTIONS * i + j);
+							// // std::cout << "State " << state1 << " from state " << queue[0].getState() << " History " << curr_board.history() << endl
+							// // 					<< curr_board.getRank() << endl
+							// // 					<< curr_board.toString() << endl;
+							// queue.push_back(curr_board);
+							// if (!curr_board.getRank()) {
+							// 	std::cout << rank << " Send Finished Signal" << endl;
+							// 	break;
+							// }
 						}
 						if (!curr_board.getRank()) break;
 					}
@@ -345,6 +390,113 @@ vector<Board> prioritizeQueue(vector<Board> queue) {
 	return new_queue;
 }
 
+// vector<Board> splitBoard(vector<Board> queue){
+// 	Board curr_board;
+// 	vector<Board> newQueue;
+// 	int ROWS = 5;
+// 	int DIRECTIONS = 4;
+// 	int ITERS = 3;
+
+// 	cout<< "ENTERED SPLITBOARD" << endl;
+// 	// for(int a = 0; a < ITERS; a++) {
+// 		// num_of_levels++;
+
+// 		int queue_length = 1;
+// 		// cout << "QUEUE LENGTH " << queue_length << endl; 
+// 		// for(int b = 0; b < queue_length; b++) {
+
+// 			for (int i = 0; i < ROWS; i++) { 
+// 				for (int j = 0; j < DIRECTIONS; j++) {
+// 					// cout << ROWS << " " << DIRECTIONS << endl;
+// 					// state1++;
+// 					curr_board = queue[0];
+
+// 					int next_move = DIRECTIONS * i + j;
+// 					int next_move_arr[2] = {next_move / 4, next_move % 4};
+// 					if(!curr_board.isReversal(next_move_arr)) {
+// 						curr_board.move(next_move);
+
+// 						newQueue.push_back(curr_board);
+// 						if (!curr_board.getRank()) {
+// 							break;
+// 						}
+// 					}
+// 				}
+// 				if (!curr_board.getRank()) break;
+// 			}
+// 			queue.erase(queue.begin());
+// 			// if (!curr_board.getRank()) {
+// 			// 	finished = 1;
+// 			// 	for(int j = 1; j < size; j++) {
+// 			// 		MPI_Send(&finished, 1, MPI_INT, j, 1, MCW);
+// 			// 	}
+// 			// 	break;
+// 			// }
+// 		// }
+// 		if (!curr_board.getRank()) break;
+// 	// }
+
+// 	cout << "Exited FOR LOOP" << endl;
+// }
+
+int checkSameRank(vector<Board> queue){
+	vector<int> rankQueue;
+	int flag = 0;
+	int rank;
+
+	cout << "QUEUE SIZE " << queue.size() << endl;
+	printQueue(queue, flag);
+
+	for(int i = 0; i < queue.size(); i++){
+		rankQueue.push_back(queue[i].getRank());
+	}
+
+	for(int i = 0; i < rankQueue.size(); i++){
+		if(i == 0){
+			rank = rankQueue[i];
+		}
+		int temp = rankQueue[i];
+
+		if(rank != temp){
+			flag = 1;
+			break;
+		}
+	}
+	return flag;
+}
+
+// vector<Board> receiveQueue(vector<Board> queue, int data[], ROWS, int size,int finished, int workFlag){
+// 	cout << "inside RECEIVE Queue" << endl;
+
+// 	for(int i = 1; i < size; i++) {
+// 		// std::cout << "Pre-Wait" << endl;
+// 		while(true) {
+// 			MPI_Iprobe(i, 0, MCW, &workFlag, &workStatus);
+// 			MPI_Test(&finishedRequest, &finished, &finishedStatus);
+
+// 			if(finished) {
+// 				for(int j = 1; j < size; j++) {
+// 					MPI_Send(&finished, 1, MPI_INT, j, 1, MCW);
+// 				}
+// 				break;
+// 			}
+// 			else if(workFlag) {
+// 				workFlag = 0;
+// 				break;
+// 			}
+// 		}
+// 		if(finished) break;
+// 		// std::cout << "Post-Wait" << endl;
+
+// 		for(int j = 0; j < size; j++) {
+// 			MPI_Recv(&data, ROWS * ROWS, MPI_INT, i, 0, MCW, MPI_STATUS_IGNORE);
+// 			queue.push_back(Board(data));
+// 		}
+// 	}
+
+// 	return queue;	
+// }
+
 
 // Print functions
 void print(string message, vector<int> vect) {
@@ -362,11 +514,11 @@ void print(string message, int x) {
 }
 
 
-void printQueue(vector<Board> queue) {
+void printQueue(vector<Board> queue, int rank) {
 	printBreak();
 	cout << "Queue Ranks and Boards: " << endl;
 	for(int i = 0; i < queue.size(); i++) {
-		cout << queue[i].getRank() << endl
+		cout << queue[i].getRank() << " at process " << rank << endl
 				 << queue[i].history() << endl
 				 << queue[i].toString() << endl << endl;
 	}
